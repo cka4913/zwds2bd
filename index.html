@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紫微斗數生日反推系統</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌟 紫微斗數生日反推系統</h1>
+            <p class="subtitle">根據命盤資料反推農曆生日時辰</p>
+        </header>
+
+        <main>
+            <!-- Step 1: 基本資料 -->
+            <section class="step" id="step1">
+                <h2>步驟 1：請提供您的農曆生日資料</h2>
+                <p class="hint">請選擇您知道的資料，不知道的選擇 "--"</p>
+
+                <div class="form-group">
+                    <label>陰陽：</label>
+                    <select id="yinyang" class="dropdown">
+                        <option value="">--</option>
+                        <option value="yang">陽</option>
+                        <option value="yin">陰</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>性別：</label>
+                    <select id="gender" class="dropdown">
+                        <option value="">--</option>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>出生年份：</label>
+                    <select id="year" class="dropdown">
+                        <option value="">--</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>農曆月份：</label>
+                    <select id="month" class="dropdown">
+                        <option value="">--</option>
+                        <option value="1">一月</option>
+                        <option value="2">二月</option>
+                        <option value="3">三月</option>
+                        <option value="4">四月</option>
+                        <option value="5">五月</option>
+                        <option value="6">六月</option>
+                        <option value="7">七月</option>
+                        <option value="8">八月</option>
+                        <option value="9">九月</option>
+                        <option value="10">十月</option>
+                        <option value="11">十一月</option>
+                        <option value="12">十二月</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>農曆日期：</label>
+                    <select id="day" class="dropdown">
+                        <option value="">--</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>出生時辰：</label>
+                    <select id="hour" class="dropdown">
+                        <option value="">--</option>
+                        <option value="zi">子時</option>
+                        <option value="chou">丑時</option>
+                        <option value="yin">寅時</option>
+                        <option value="mao">卯時</option>
+                        <option value="chen">辰時</option>
+                        <option value="si">巳時</option>
+                        <option value="wu">午時</option>
+                        <option value="wei">未時</option>
+                        <option value="shen">申時</option>
+                        <option value="you">酉時</option>
+                        <option value="xu">戌時</option>
+                        <option value="hai">亥時</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>局數：</label>
+                    <select id="ju" class="dropdown">
+                        <option value="">--</option>
+                        <option value="2">水二局</option>
+                        <option value="3">木三局</option>
+                        <option value="4">金四局</option>
+                        <option value="5">土五局</option>
+                        <option value="6">火六局</option>
+                    </select>
+                </div>
+
+                <button class="btn-primary" onclick="nextStep()">下一步</button>
+            </section>
+
+            <!-- Step 2: 命宮位置 -->
+            <section class="step hidden" id="step2">
+                <h2>步驟 2：請提供命宮位置</h2>
+                <p class="hint">命宮是十二宮中的第一宮，請選擇所在宮位</p>
+
+                <div class="palace-grid">
+                    <div class="palace-cell" data-palace="si">巳宮</div>
+                    <div class="palace-cell" data-palace="wu">午宮</div>
+                    <div class="palace-cell" data-palace="wei">未宮</div>
+                    <div class="palace-cell" data-palace="shen">申宮</div>
+
+                    <div class="palace-cell" data-palace="chen">辰宮</div>
+                    <div class="center-text">中宮</div>
+                    <div class="palace-cell" data-palace="you">酉宮</div>
+
+                    <div class="palace-cell" data-palace="mao">卯宮</div>
+                    <div class="palace-cell" data-palace="xu">戌宮</div>
+
+                    <div class="palace-cell" data-palace="yin">寅宮</div>
+                    <div class="palace-cell" data-palace="chou">丑宮</div>
+                    <div class="palace-cell" data-palace="zi">子宮</div>
+                    <div class="palace-cell" data-palace="hai">亥宮</div>
+                </div>
+
+                <div class="selected-palace">
+                    <label>已選擇：</label>
+                    <span id="mingGongResult">未選擇</span>
+                </div>
+
+                <button class="btn-secondary" onclick="prevStep()">上一步</button>
+                <button class="btn-primary" onclick="nextStep()">下一步</button>
+            </section>
+
+            <!-- Step 3: 紫微星位置 -->
+            <section class="step hidden" id="step3">
+                <h2>步驟 3：請提供紫微星位置</h2>
+                <p class="hint">紫微星是帝星，請選擇所在宮位</p>
+
+                <div class="palace-grid">
+                    <div class="palace-cell ziwu-cell" data-palace="si">巳宮</div>
+                    <div class="palace-cell ziwu-cell" data-palace="wu">午宮</div>
+                    <div class="palace-cell ziwu-cell" data-palace="wei">未宮</div>
+                    <div class="palace-cell ziwu-cell" data-palace="shen">申宮</div>
+
+                    <div class="palace-cell ziwu-cell" data-palace="chen">辰宮</div>
+                    <div class="center-text">紫微</div>
+                    <div class="palace-cell ziwu-cell" data-palace="you">酉宮</div>
+
+                    <div class="palace-cell ziwu-cell" data-palace="mao">卯宮</div>
+                    <div class="palace-cell ziwu-cell" data-palace="xu">戌宮</div>
+
+                    <div class="palace-cell ziwu-cell" data-palace="yin">寅宮</div>
+                    <div class="palace-cell ziwu-cell" data-palace="chou">丑宮</div>
+                    <div class="palace-cell ziwu-cell" data-palace="zi">子宮</div>
+                    <div class="palace-cell ziwu-cell" data-palace="hai">亥宮</div>
+                </div>
+
+                <div class="selected-palace">
+                    <label>已選擇：</label>
+                    <span id="ziweiResult">未選擇</span>
+                </div>
+
+                <button class="btn-secondary" onclick="prevStep()">上一步</button>
+                <button class="btn-primary" onclick="nextStep()">下一步</button>
+            </section>
+
+            <!-- Step 4: 根據缺失資料問問題 -->
+            <section class="step hidden" id="step4">
+                <h2>步驟 4：補充資料</h2>
+                <div id="missingDataQuestions"></div>
+
+                <button class="btn-secondary" onclick="prevStep()">上一步</button>
+                <button class="btn-primary" onclick="nextStep()">下一步</button>
+            </section>
+
+            <!-- Step 5: 三台八座 -->
+            <section class="step hidden" id="step5">
+                <h2>步驟 5：三台八座位置（可選）</h2>
+                <p class="hint">如果知道三台八座的位置，可以更準確地推算</p>
+
+                <div class="form-group">
+                    <label>三台星位置：</label>
+                    <select id="santai" class="dropdown">
+                        <option value="">不知道</option>
+                        <option value="zi">子宮</option>
+                        <option value="chou">丑宮</option>
+                        <option value="yin">寅宮</option>
+                        <option value="mao">卯宮</option>
+                        <option value="chen">辰宮</option>
+                        <option value="si">巳宮</option>
+                        <option value="wu">午宮</option>
+                        <option value="wei">未宮</option>
+                        <option value="shen">申宮</option>
+                        <option value="you">酉宮</option>
+                        <option value="xu">戌宮</option>
+                        <option value="hai">亥宮</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>八座星位置：</label>
+                    <select id="bazuo" class="dropdown">
+                        <option value="">不知道</option>
+                        <option value="zi">子宮</option>
+                        <option value="chou">丑宮</option>
+                        <option value="yin">寅宮</option>
+                        <option value="mao">卯宮</option>
+                        <option value="chen">辰宮</option>
+                        <option value="si">巳宮</option>
+                        <option value="wu">午宮</option>
+                        <option value="wei">未宮</option>
+                        <option value="shen">申宮</option>
+                        <option value="you">酉宮</option>
+                        <option value="xu">戌宮</option>
+                        <option value="hai">亥宮</option>
+                    </select>
+                </div>
+
+                <button class="btn-secondary" onclick="prevStep()">上一步</button>
+                <button class="btn-primary" onclick="calculateBirthday()">計算生日</button>
+            </section>
+
+            <!-- Step 6: 結果 -->
+            <section class="step hidden" id="step6">
+                <h2>🎯 推算結果</h2>
+                <div id="results"></div>
+
+                <button class="btn-primary" onclick="restart()">重新開始</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
