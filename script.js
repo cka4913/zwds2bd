@@ -513,17 +513,21 @@ function calculateMissingData() {
             });
         } else {
             const possibleDays = calculatePossibleDaysInMonth();
+            const extraFilters = [];
+            if (userData.santai) extraFilters.push(`三台（${getPalaceName(userData.santai)}）`);
+            if (userData.bazuo) extraFilters.push(`八座（${getPalaceName(userData.bazuo)}）`);
+            const filterText = extraFilters.length > 0 ? `、${extraFilters.join('、')}` : '';
             if (possibleDays.length > 0) {
                 results.push({
                     title: '可能農曆日期',
-                    description: `根據紫微星位置、命宮位置、已知月份（${userData.month}月）及局數（${juConfig[userData.ju].name}），以下為可能的農曆日期：`,
+                    description: `根據紫微星位置、命宮位置、已知月份（${userData.month}月）、局數（${juConfig[userData.ju].name}）${filterText}，以下為可能的農曆日期：`,
                     result: possibleDays.join('<br>')
                 });
             } else {
                 results.push({
                     title: '可能農曆日期',
                     description: '未找到符合條件的日期',
-                    result: '目前輸入條件互相衝突，請檢查命宮、紫微星、月份、時辰是否正確。'
+                    result: '目前輸入條件互相衝突，請檢查命宮、紫微星、月份、時辰、三台八座是否正確。'
                 });
             }
         }
@@ -736,6 +740,11 @@ function calculateDaysInMonth(year, month, ziwei, mingGong, ju) {
                 continue;
             }
 
+            // 若提供三台/八座位置，需同時符合日系星定位
+            if (!matchSantaiBazuoByDay(month, day)) {
+                continue;
+            }
+
             const yinyangName =
                 userData.yinyang === 'yang' ? '陽' : (userData.yinyang === 'yin' ? '陰' : '?');
             const genderName =
@@ -854,6 +863,36 @@ function isMingGongMatch(month, hourCode, mingGongCode) {
     const monthIndex = month - 1;
     const calculatedMingIndex = ((monthIndex - hourIndex) % 12 + 12) % 12;
     return calculatedMingIndex === mingIndex;
+}
+
+function getZuoYouIndexByMonth(month) {
+    const earthlyBranches = ['yin', 'mao', 'chen', 'si', 'wu', 'wei', 'shen', 'you', 'xu', 'hai', 'zi', 'chou'];
+    const chenIndex = earthlyBranches.indexOf('chen');
+    const xuIndex = earthlyBranches.indexOf('xu');
+    const monthOffset = month - 1;
+
+    return {
+        zuoIndex: fixZiweiIndex(chenIndex + monthOffset),
+        youIndex: fixZiweiIndex(xuIndex - monthOffset)
+    };
+}
+
+function matchSantaiBazuoByDay(month, day) {
+    // 未提供三台/八座時，不作為限制條件
+    if (!userData.santai && !userData.bazuo) return true;
+
+    const { zuoIndex, youIndex } = getZuoYouIndexByMonth(month);
+    const dayIndex = day - 1; // 初一 = 0
+    const santaiIndex = fixZiweiIndex(zuoIndex + dayIndex);
+    const bazuoIndex = fixZiweiIndex(youIndex - dayIndex);
+
+    const santaiCode = twelvePalaces[santaiIndex];
+    const bazuoCode = twelvePalaces[bazuoIndex];
+
+    if (userData.santai && userData.santai !== santaiCode) return false;
+    if (userData.bazuo && userData.bazuo !== bazuoCode) return false;
+
+    return true;
 }
 
 function compareLunarDateText(a, b) {
