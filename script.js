@@ -14,7 +14,9 @@ let userData = {
     firstLimit: '',
     brothersLimit: '',
     santai: '',
-    bazuo: ''
+    bazuo: '',
+    enguang: '',
+    tiangui: ''
 };
 
 // 天干地支
@@ -389,9 +391,11 @@ function updateBrothersOptions(juNum) {
 
 // 計算生日
 function calculateBirthday() {
-    // 保存三台八座資料
+    // 保存日系星資料
     userData.santai = document.getElementById('santai').value;
     userData.bazuo = document.getElementById('bazuo').value;
+    userData.enguang = document.getElementById('enguang').value;
+    userData.tiangui = document.getElementById('tiangui').value;
 
     const results = [];
 
@@ -516,6 +520,8 @@ function calculateMissingData() {
             const extraFilters = [];
             if (userData.santai) extraFilters.push(`三台（${getPalaceName(userData.santai)}）`);
             if (userData.bazuo) extraFilters.push(`八座（${getPalaceName(userData.bazuo)}）`);
+            if (userData.enguang) extraFilters.push(`恩光（${getPalaceName(userData.enguang)}）`);
+            if (userData.tiangui) extraFilters.push(`天貴（${getPalaceName(userData.tiangui)}）`);
             const filterText = extraFilters.length > 0 ? `、${extraFilters.join('、')}` : '';
             if (possibleDays.length > 0) {
                 results.push({
@@ -527,7 +533,7 @@ function calculateMissingData() {
                 results.push({
                     title: '可能農曆日期',
                     description: '未找到符合條件的日期',
-                    result: '目前輸入條件互相衝突，請檢查命宮、紫微星、月份、時辰、三台八座是否正確。'
+                    result: '目前輸入條件互相衝突，請檢查命宮、紫微星、月份、時辰、三台八座、恩光天貴是否正確。'
                 });
             }
         }
@@ -745,6 +751,11 @@ function calculateDaysInMonth(year, month, ziwei, mingGong, ju) {
                 continue;
             }
 
+            // 若提供恩光/天貴位置，需同時符合日系星定位
+            if (!matchEnguangTianguiByDay(day)) {
+                continue;
+            }
+
             const yinyangName =
                 userData.yinyang === 'yang' ? '陽' : (userData.yinyang === 'yin' ? '陰' : '?');
             const genderName =
@@ -895,6 +906,58 @@ function matchSantaiBazuoByDay(month, day) {
     return true;
 }
 
+function getWenchangIndexByHour(hourCode) {
+    const hourIndex = getHourIndexByZiOrder(hourCode);
+    if (hourIndex < 0) return null;
+
+    const xuIndex = twelvePalaces.indexOf('xu');
+    return fixZiweiIndex(xuIndex - hourIndex);
+}
+
+function getWenquIndexByHour(hourCode) {
+    const hourIndex = getHourIndexByZiOrder(hourCode);
+    if (hourIndex < 0) return null;
+
+    const chenIndex = twelvePalaces.indexOf('chen');
+    return fixZiweiIndex(chenIndex + hourIndex);
+}
+
+function getChangQuIndexesForDayStars() {
+    // 優先使用時辰推回昌曲；若時辰未知且有文昌，先由文昌推時辰
+    let hourCode = userData.hour;
+    if (!hourCode && userData.wenchang) {
+        hourCode = calculateHourFromWenchang(userData.wenchang);
+    }
+    if (!hourCode) return null;
+
+    const wenchangIndex = getWenchangIndexByHour(hourCode);
+    const wenquIndex = getWenquIndexByHour(hourCode);
+    if (wenchangIndex === null || wenquIndex === null) return null;
+
+    return { wenchangIndex, wenquIndex };
+}
+
+function matchEnguangTianguiByDay(day) {
+    if (!userData.enguang && !userData.tiangui) return true;
+
+    const changQuIndexes = getChangQuIndexesForDayStars();
+    if (!changQuIndexes) return true;
+
+    // 口訣：文昌/文曲順數到生日，退後一步安恩光/天貴
+    // 等價於：索引 = 昌(曲) + (日 - 2)
+    const dayOffset = day - 2;
+    const enguangIndex = fixZiweiIndex(changQuIndexes.wenchangIndex + dayOffset);
+    const tianguiIndex = fixZiweiIndex(changQuIndexes.wenquIndex + dayOffset);
+
+    const enguangCode = twelvePalaces[enguangIndex];
+    const tianguiCode = twelvePalaces[tianguiIndex];
+
+    if (userData.enguang && userData.enguang !== enguangCode) return false;
+    if (userData.tiangui && userData.tiangui !== tianguiCode) return false;
+
+    return true;
+}
+
 function compareLunarDateText(a, b) {
     const ak = extractLunarDateKey(a);
     const bk = extractLunarDateKey(b);
@@ -984,7 +1047,9 @@ function restart() {
         firstLimit: '',
         brothersLimit: '',
         santai: '',
-        bazuo: ''
+        bazuo: '',
+        enguang: '',
+        tiangui: ''
     };
 
     // 重置表單
@@ -995,6 +1060,10 @@ function restart() {
     document.getElementById('day').value = '';
     document.getElementById('hour').value = '';
     document.getElementById('ju').value = '';
+    document.getElementById('santai').value = '';
+    document.getElementById('bazuo').value = '';
+    document.getElementById('enguang').value = '';
+    document.getElementById('tiangui').value = '';
 
     // 重置宮位選擇
     document.querySelectorAll('.palace-cell').forEach(cell => {
